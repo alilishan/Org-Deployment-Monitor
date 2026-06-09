@@ -36,17 +36,31 @@ export default function DeploymentTable({ repos }: Props) {
       <TableBody>
         {repos.map(repo => {
           const envMap = new Map(repo.environments.map(e => [e.environment, e]))
+          const tagFingerprints = repo.environments
+            .map(e => [...e.imageTags].sort().join(","))
+            .filter(s => s !== "")
+          const imageDrifted = tagFingerprints.length > 1 && new Set(tagFingerprints).size > 1
           return (
             <TableRow key={repo.fullName}>
               <TableCell className="align-top py-3">
-                <a
-                  href={`https://github.com/${repo.fullName}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-mono font-semibold text-sm text-primary hover:underline"
-                >
-                  {repo.name}
-                </a>
+                <div className="flex items-center gap-1.5">
+                  <a
+                    href={`https://github.com/${repo.fullName}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono font-semibold text-sm text-primary hover:underline"
+                  >
+                    {repo.name}
+                  </a>
+                  {imageDrifted && (
+                    <span
+                      title="Image versions differ across environments"
+                      className="text-[10px] font-medium px-1 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-900"
+                    >
+                      image drift
+                    </span>
+                  )}
+                </div>
                 {repo.latestTag && (
                   <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">
                     latest: {repo.latestTag}
