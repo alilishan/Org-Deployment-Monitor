@@ -57,9 +57,9 @@ export default function EnvCell({ deployment }: Props) {
         </TooltipContent>
       </Tooltip>
       <div className="text-[10px] text-muted-foreground leading-tight font-mono">
-        {deployment.imageTag && (
-          <div className="text-blue-400/70">{deployment.imageTag}</div>
-        )}
+        {deployment.imageTags.map(tag => (
+          <div key={tag} className="text-blue-400/70">{tag}</div>
+        ))}
         {deployment.deployedBy && <span>{deployment.deployedBy}</span>}
         {deployment.deployedAt && (
           <span> · {formatRelative(deployment.deployedAt)}</span>

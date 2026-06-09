@@ -3,7 +3,7 @@ export type DeploymentStatus = "success" | "failure" | "pending" | "none"
 export type EnvDeployment = {
   environment: string
   version: string | null
-  imageTag: string | null
+  imageTags: string[]
   status: DeploymentStatus
   deployedAt: string | null
   deployedBy: string | null

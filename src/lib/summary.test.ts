@@ -6,15 +6,15 @@ const repos: RepoDeployment[] = [
   {
     name: "repo-a", fullName: "org/repo-a", latestTag: "v1.0.0",
     environments: [
-      { environment: "dev",  version: "v1.0.0", imageTag: null, status: "success", deployedAt: null, deployedBy: null, deploymentUrl: "" },
-      { environment: "prod", version: "v0.9.0", imageTag: null, status: "failure", deployedAt: null, deployedBy: null, deploymentUrl: "" },
+      { environment: "dev",  version: "v1.0.0", imageTags: [], status: "success", deployedAt: null, deployedBy: null, deploymentUrl: "" },
+      { environment: "prod", version: "v0.9.0", imageTags: [], status: "failure", deployedAt: null, deployedBy: null, deploymentUrl: "" },
     ],
   },
   {
     name: "repo-b", fullName: "org/repo-b", latestTag: "v2.0.0",
     environments: [
-      { environment: "dev", version: "v2.0.0", imageTag: null, status: "success", deployedAt: null, deployedBy: null, deploymentUrl: "" },
-      { environment: "uat", version: "v1.9.0", imageTag: null, status: "pending", deployedAt: null, deployedBy: null, deploymentUrl: "" },
+      { environment: "dev", version: "v2.0.0", imageTags: [], status: "success", deployedAt: null, deployedBy: null, deploymentUrl: "" },
+      { environment: "uat", version: "v1.9.0", imageTags: [], status: "pending", deployedAt: null, deployedBy: null, deploymentUrl: "" },
     ],
   },
 ]

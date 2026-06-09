@@ -64,26 +64,33 @@ async function getOrgPackages(token: string, org: string): Promise<GHPackage[]> 
   }
 }
 
-// Returns env name → version tag, e.g. { dev: "main.36.1", uat: "main.33.0", prod: "main.1.1" }
+function isVersionTag(tag: string): boolean {
+  if (MARKER_TAGS.has(tag)) return false
+  if (tag.startsWith("sha256")) return false
+  if (/^[0-9a-f]{40,}$/i.test(tag)) return false
+  return true
+}
+
+// Returns env name → all version tags (excludes env markers and SHA digests)
 async function getImageTagsByEnv(
   token: string,
   org: string,
   packageName: string
-): Promise<Record<string, string>> {
+): Promise<Record<string, string[]>> {
   try {
     const versions = await ghFetch<GHPackageVersion[]>(
       token,
       `/orgs/${org}/packages/container/${encodeURIComponent(packageName)}/versions?per_page=100`
     )
-    const result: Record<string, string> = {}
+    const result: Record<string, string[]> = {}
     for (const version of versions) {
       const tags = version.metadata?.container?.tags ?? []
       const marker = tags.find(t => MARKER_TAGS.has(t))
       if (!marker) continue
-      const versionTag = tags.find(t => !MARKER_TAGS.has(t))
-      if (!versionTag) continue
+      const versionTags = tags.filter(isVersionTag)
+      if (versionTags.length === 0) continue
       const env = Object.entries(ENV_MARKER).find(([, m]) => m === marker)?.[0]
-      if (env) result[env] = versionTag
+      if (env) result[env] = versionTags
     }
     return result
   } catch {
@@ -98,7 +105,7 @@ async function getDeploymentStatuses(token: string, fullName: string, id: number
 async function fetchRepoDeployment(
   token: string,
   repo: GHRepo,
-  imageTagsByEnv: Record<string, string>
+  imageTagsByEnv: Record<string, string[]>
 ): Promise<RepoDeployment> {
   const [tags, deployments] = await Promise.all([
     getRepoTags(token, repo.full_name),
@@ -119,7 +126,7 @@ async function fetchRepoDeployment(
       return {
         environment: env,
         version: resolveVersion(dep.ref, tags),
-        imageTag: imageTagsByEnv[env] ?? null,
+        imageTags: imageTagsByEnv[env] ?? [],
         status: normaliseStatus(statuses[0]?.state),
         deployedAt: dep.created_at,
         deployedBy: dep.creator?.login ?? null,
