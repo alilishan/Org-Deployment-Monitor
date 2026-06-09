@@ -13,5 +13,6 @@ export type RepoDeployment = {
   name: string
   fullName: string
   latestTag: string | null
+  latestImageTag: string | null
   environments: EnvDeployment[]
 }

@@ -49,14 +49,32 @@ async function getRepoDeployments(token: string, fullName: string): Promise<GHDe
   return ghFetch<GHDeployment[]>(token, `/repos/${fullName}/deployments?per_page=100`)
 }
 
+type GHPackageVersion = { metadata: { container: { tags: string[] } } }
+
+async function getLatestImageTag(token: string, org: string, repoName: string): Promise<string | null> {
+  try {
+    const versions = await ghFetch<GHPackageVersion[]>(
+      token,
+      `/orgs/${org}/packages/container/${encodeURIComponent(repoName)}/versions?per_page=1`
+    )
+    const tags = versions[0]?.metadata?.container?.tags ?? []
+    // Prefer a non-"latest" tag (the version tag), fall back to whatever exists
+    return tags.find(t => t !== "latest") ?? tags[0] ?? null
+  } catch {
+    return null
+  }
+}
+
 async function getDeploymentStatuses(token: string, fullName: string, id: number): Promise<GHDeploymentStatus[]> {
   return ghFetch<GHDeploymentStatus[]>(token, `/repos/${fullName}/deployments/${id}/statuses`)
 }
 
 async function fetchRepoDeployment(token: string, repo: GHRepo): Promise<RepoDeployment> {
-  const [tags, deployments] = await Promise.all([
+  const org = repo.full_name.split("/")[0]
+  const [tags, deployments, latestImageTag] = await Promise.all([
     getRepoTags(token, repo.full_name),
     getRepoDeployments(token, repo.full_name),
+    getLatestImageTag(token, org, repo.name),
   ])
 
   const latestTag = tags[0]?.name ?? null
@@ -81,7 +99,7 @@ async function fetchRepoDeployment(token: string, repo: GHRepo): Promise<RepoDep
     })
   )
 
-  return { name: repo.name, fullName: repo.full_name, latestTag, environments }
+  return { name: repo.name, fullName: repo.full_name, latestTag, latestImageTag, environments }
 }
 
 export async function fetchDashboard(token: string, org = "BUCC-Ounch"): Promise<RepoDeployment[]> {

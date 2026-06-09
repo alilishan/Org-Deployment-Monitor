@@ -4,14 +4,14 @@ import type { RepoDeployment } from "@/types/deployment"
 
 const repos: RepoDeployment[] = [
   {
-    name: "repo-a", fullName: "org/repo-a", latestTag: "v1.0.0",
+    name: "repo-a", fullName: "org/repo-a", latestTag: "v1.0.0", latestImageTag: null,
     environments: [
       { environment: "dev",  version: "v1.0.0", status: "success", deployedAt: null, deployedBy: null, deploymentUrl: "" },
       { environment: "prod", version: "v0.9.0", status: "failure", deployedAt: null, deployedBy: null, deploymentUrl: "" },
     ],
   },
   {
-    name: "repo-b", fullName: "org/repo-b", latestTag: "v2.0.0",
+    name: "repo-b", fullName: "org/repo-b", latestTag: "v2.0.0", latestImageTag: null,
     environments: [
       { environment: "dev", version: "v2.0.0", status: "success", deployedAt: null, deployedBy: null, deploymentUrl: "" },
       { environment: "uat", version: "v1.9.0", status: "pending", deployedAt: null, deployedBy: null, deploymentUrl: "" },
