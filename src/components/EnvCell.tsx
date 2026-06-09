@@ -30,19 +30,19 @@ export default function EnvCell({ deployment }: Props) {
     )
   }
 
-  const badge = (
-    <a href={deployment.deploymentUrl} target="_blank" rel="noopener noreferrer">
-      <Badge className={`font-mono text-xs ${statusStyles[deployment.status]}`}>
-        {deployment.version ?? "unknown"}
-        {statusSuffix[deployment.status] ?? ""}
-      </Badge>
-    </a>
-  )
-
   return (
     <div className="flex flex-col gap-0.5">
       <Tooltip>
-        <TooltipTrigger asChild>{badge}</TooltipTrigger>
+        <TooltipTrigger
+          render={(props) => (
+            <a {...props} href={deployment.deploymentUrl} target="_blank" rel="noopener noreferrer">
+              <Badge className={`font-mono text-xs ${statusStyles[deployment.status]}`}>
+                {deployment.version ?? "unknown"}
+                {statusSuffix[deployment.status] ?? ""}
+              </Badge>
+            </a>
+          )}
+        />
         <TooltipContent side="top">
           <p className="text-xs">
             by <span className="font-semibold">{deployment.deployedBy ?? "unknown"}</span>
