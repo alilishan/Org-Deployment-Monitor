@@ -1,6 +1,5 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
   TooltipContent,
@@ -9,62 +8,84 @@ import {
 import { formatRelative } from "@/lib/format-date"
 import type { EnvDeployment, DeploymentStatus } from "@/types/deployment"
 
-const statusStyles: Record<DeploymentStatus, string> = {
-  success: "bg-green-950 text-green-400 border-green-900 hover:bg-green-950",
-  failure: "bg-red-950 text-red-400 border-red-900 hover:bg-red-950",
-  pending: "bg-amber-950 text-amber-400 border-amber-900 hover:bg-amber-950",
-  none:    "bg-muted text-muted-foreground border-border hover:bg-muted",
+const statusClass: Record<DeploymentStatus, string> = {
+  success: "status-badge status-success",
+  failure: "status-badge status-failure",
+  pending: "status-badge status-pending",
+  none:    "status-badge status-none",
 }
 
-const statusSuffix: Partial<Record<DeploymentStatus, string>> = {
-  failure: " ✗",
-  pending: " ⏳",
+const statusIcon: Partial<Record<DeploymentStatus, string>> = {
+  failure: "✗",
+  pending: "◌",
+}
+
+function tagClass(tag: string): string {
+  if (tag === "main" || tag.startsWith("main.") || tag.startsWith("main-")) return "tag-chip tag-chip-green"
+  if (/^v?\d+\.\d+(\.\d+)?(-\w+)?$/.test(tag)) return "tag-chip tag-chip-amber"
+  return "tag-chip tag-chip-red"
 }
 
 type Props = { deployment: EnvDeployment | null }
 
 export default function EnvCell({ deployment }: Props) {
   if (!deployment) {
-    return (
-      <Badge variant="outline" className="text-muted-foreground/40 font-mono">
-        —
-      </Badge>
-    )
+    return <span className="font-mono text-[11px] text-[#1e2d48]">—</span>
   }
 
+  const icon = statusIcon[deployment.status]
+
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-1.5">
       <Tooltip>
         <TooltipTrigger
           render={(props) => (
-            <a {...props} href={deployment.deploymentUrl} target="_blank" rel="noopener noreferrer">
-              <Badge className={`font-mono text-xs ${statusStyles[deployment.status]}`}>
+            <a
+              {...props}
+              href={deployment.deploymentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block"
+            >
+              <span className={statusClass[deployment.status]}>
+                {icon && <span className="mr-1 opacity-70">{icon}</span>}
                 {deployment.version ?? "unknown"}
-                {statusSuffix[deployment.status] ?? ""}
-              </Badge>
+              </span>
             </a>
           )}
         />
-        <TooltipContent side="top">
-          <p className="text-xs">
-            by <span className="font-semibold">{deployment.deployedBy ?? "unknown"}</span>
-          </p>
-          {deployment.deployedAt && (
-            <p className="text-xs text-muted-foreground">
-              {new Date(deployment.deployedAt).toLocaleString()}
+        <TooltipContent
+          side="top"
+          className="bg-[#0c1020] border border-[#243050] text-[#bcc6dc] shadow-xl shadow-black/50"
+        >
+          <div className="text-xs space-y-0.5">
+            <p>
+              <span className="text-[#4d6080]">by </span>
+              <span className="font-semibold text-[#8aabcc]">{deployment.deployedBy ?? "unknown"}</span>
             </p>
-          )}
+            {deployment.deployedAt && (
+              <p className="text-[#4d6080]">{new Date(deployment.deployedAt).toLocaleString()}</p>
+            )}
+          </div>
         </TooltipContent>
       </Tooltip>
-      <div className="text-[10px] text-muted-foreground leading-tight font-mono">
-        {deployment.imageTags.map(tag => (
-          <div key={tag} className="text-blue-400/70">{tag}</div>
-        ))}
-        {deployment.deployedBy && <span>{deployment.deployedBy}</span>}
-        {deployment.deployedAt && (
-          <span> · {formatRelative(deployment.deployedAt)}</span>
-        )}
-      </div>
+
+      {deployment.imageTags.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {deployment.imageTags.map(tag => (
+            <span key={tag} className={tagClass(tag)}>{tag}</span>
+          ))}
+        </div>
+      )}
+
+      {(deployment.deployedBy || deployment.deployedAt) && (
+        <div className="font-mono text-[11px] text-[#8aabcc] leading-tight">
+          {deployment.deployedBy && <span>{deployment.deployedBy}</span>}
+          {deployment.deployedAt && (
+            <span className="text-[#506888]"> · {formatRelative(deployment.deployedAt)}</span>
+          )}
+        </div>
+      )}
     </div>
   )
 }
