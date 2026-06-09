@@ -15,8 +15,6 @@ type GHDeploymentStatus = { state: string }
 
 export class GitHubAuthError extends Error {}
 
-const ACTIVE_ENVS = new Set(["dev", "uat", "prod"])
-
 async function ghFetch<T>(token: string, path: string): Promise<T> {
   const res = await fetch(`https://api.github.com${path}`, {
     headers: {
@@ -63,11 +61,10 @@ async function fetchRepoDeployment(token: string, repo: GHRepo): Promise<RepoDep
 
   const latestTag = tags[0]?.name ?? null
 
-  // Keep only the latest deployment per active environment (API returns newest first)
+  // Keep only the latest deployment per environment (API returns newest first)
   const latestPerEnv = new Map<string, GHDeployment>()
   for (const dep of deployments) {
-    if (ACTIVE_ENVS.has(dep.environment) && !latestPerEnv.has(dep.environment))
-      latestPerEnv.set(dep.environment, dep)
+    if (!latestPerEnv.has(dep.environment)) latestPerEnv.set(dep.environment, dep)
   }
 
   const environments: EnvDeployment[] = await Promise.all(
