@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button"
 import { refreshDashboard } from "@/app/actions"
+import RefreshButton from "@/components/RefreshButton"
 import type { Summary } from "@/lib/summary"
 
 export default function SummaryBar({ healthy, pending, failed }: Summary) {
@@ -18,9 +18,7 @@ export default function SummaryBar({ healthy, pending, failed }: Summary) {
         <span className="text-muted-foreground">{failed} failed</span>
       </div>
       <form action={refreshDashboard} className="ml-auto">
-        <Button type="submit" variant="outline" size="sm">
-          ↻ Refresh
-        </Button>
+        <RefreshButton />
       </form>
     </div>
   )
