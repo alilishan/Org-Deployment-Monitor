@@ -85,12 +85,12 @@ async function getImageTagsByEnv(
     const result: Record<string, string[]> = {}
     for (const version of versions) {
       const tags = version.metadata?.container?.tags ?? []
-      const marker = tags.find(t => MARKER_TAGS.has(t))
-      if (!marker) continue
       const versionTags = tags.filter(isVersionTag)
       if (versionTags.length === 0) continue
-      const env = Object.entries(ENV_MARKER).find(([, m]) => m === marker)?.[0]
-      if (env) result[env] = versionTags
+      // A single image version can carry multiple env markers at once (e.g. dev + uat + latest)
+      for (const [env, marker] of Object.entries(ENV_MARKER)) {
+        if (tags.includes(marker) && !result[env]) result[env] = versionTags
+      }
     }
     return result
   } catch {
