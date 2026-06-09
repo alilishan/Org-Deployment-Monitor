@@ -30,7 +30,7 @@ type Props = { deployment: EnvDeployment | null }
 
 export default function EnvCell({ deployment }: Props) {
   if (!deployment) {
-    return <span className="font-mono text-[11px] text-[#1e2d48]">—</span>
+    return <span className="font-mono text-[11px] text-muted-foreground/30">—</span>
   }
 
   const icon = statusIcon[deployment.status]
@@ -56,15 +56,15 @@ export default function EnvCell({ deployment }: Props) {
         />
         <TooltipContent
           side="top"
-          className="bg-[#0c1020] border border-[#243050] text-[#bcc6dc] shadow-xl shadow-black/50"
+          className="bg-card border border-border text-foreground shadow-xl"
         >
           <div className="text-xs space-y-0.5">
             <p>
-              <span className="text-[#4d6080]">by </span>
-              <span className="font-semibold text-[#8aabcc]">{deployment.deployedBy ?? "unknown"}</span>
+              <span className="text-muted-foreground">by </span>
+              <span className="font-semibold">{deployment.deployedBy ?? "unknown"}</span>
             </p>
             {deployment.deployedAt && (
-              <p className="text-[#4d6080]">{new Date(deployment.deployedAt).toLocaleString()}</p>
+              <p className="text-muted-foreground">{new Date(deployment.deployedAt).toLocaleString()}</p>
             )}
           </div>
         </TooltipContent>
@@ -79,10 +79,12 @@ export default function EnvCell({ deployment }: Props) {
       )}
 
       {(deployment.deployedBy || deployment.deployedAt) && (
-        <div className="font-mono text-[11px] text-[#8aabcc] leading-tight">
-          {deployment.deployedBy && <span>{deployment.deployedBy}</span>}
+        <div className="font-mono text-[11px] leading-tight">
+          {deployment.deployedBy && (
+            <span className="text-foreground/60">{deployment.deployedBy}</span>
+          )}
           {deployment.deployedAt && (
-            <span className="text-[#506888]"> · {formatRelative(deployment.deployedAt)}</span>
+            <span className="text-muted-foreground"> · {formatRelative(deployment.deployedAt)}</span>
           )}
         </div>
       )}

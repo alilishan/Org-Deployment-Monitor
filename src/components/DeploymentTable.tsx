@@ -14,9 +14,9 @@ import type { RepoDeployment } from "@/types/deployment"
 type Props = { repos: RepoDeployment[] }
 
 const envDot: Record<string, string> = {
-  dev: "bg-cyan-400",
-  uat: "bg-amber-400",
-  prod: "bg-emerald-400",
+  dev:  "bg-cyan-500 dark:bg-cyan-400",
+  uat:  "bg-amber-500 dark:bg-amber-400",
+  prod: "bg-emerald-500 dark:bg-emerald-400",
 }
 
 export default function DeploymentTable({ repos }: Props) {
@@ -25,11 +25,11 @@ export default function DeploymentTable({ repos }: Props) {
   ])
 
   return (
-    <div className="rounded-[8px] border border-[#192034] overflow-hidden">
+    <div className="rounded-[8px] border border-border overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow className="border-b border-[#192034] bg-[#0a0e1c] hover:bg-[#0a0e1c]">
-            <TableHead className="w-56 py-3 px-5 font-mono text-[10px] tracking-widest text-[#2f4466] uppercase">
+          <TableRow className="border-b border-border bg-muted/40 dark:bg-[#0a0e1c] hover:bg-muted/40 dark:hover:bg-[#0a0e1c]">
+            <TableHead className="w-56 py-3 px-5 font-mono text-[10px] tracking-widest text-muted-foreground/60 uppercase">
               Repository
             </TableHead>
             {allEnvs.map((env, i) => (
@@ -37,7 +37,7 @@ export default function DeploymentTable({ repos }: Props) {
                 <TableHead className="py-3 px-4 font-mono text-[10px] tracking-widest uppercase">
                   <div className="flex items-center gap-1.5">
                     <span className={`w-1.5 h-1.5 rounded-full ${envDot[env] ?? "bg-slate-400"}`} />
-                    <span className="text-[#4d6080]">{env}</span>
+                    <span className="text-muted-foreground">{env}</span>
                   </div>
                 </TableHead>
                 {i < allEnvs.length - 1 && (
@@ -57,8 +57,10 @@ export default function DeploymentTable({ repos }: Props) {
             return (
               <TableRow
                 key={repo.fullName}
-                className={`border-b border-[#192034] hover:bg-[#0d1226] transition-colors ${
-                  rowIndex % 2 === 0 ? "bg-[#07080f]" : "bg-[#090c1a]"
+                className={`border-b border-border transition-colors hover:bg-muted/40 dark:hover:bg-[#0d1226] ${
+                  rowIndex % 2 === 0
+                    ? "bg-background"
+                    : "bg-muted/20 dark:bg-[#090c1a]"
                 }`}
               >
                 <TableCell className="align-top py-4 px-5">
@@ -67,7 +69,7 @@ export default function DeploymentTable({ repos }: Props) {
                       href={`https://github.com/${repo.fullName}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-mono font-semibold text-[13px] text-[#8aabcc] hover:text-cyan-300 transition-colors"
+                      className="font-mono font-semibold text-[13px] text-blue-600 dark:text-[#8aabcc] hover:text-blue-800 dark:hover:text-cyan-300 transition-colors"
                     >
                       {repo.name}
                     </a>
@@ -78,7 +80,7 @@ export default function DeploymentTable({ repos }: Props) {
                     )}
                   </div>
                   {repo.latestTag && (
-                    <div className="mt-1 font-mono text-[10px] text-[#2f4466]">
+                    <div className="mt-1 font-mono text-[10px] text-muted-foreground/60">
                       tag: {repo.latestTag}
                     </div>
                   )}
@@ -98,7 +100,7 @@ export default function DeploymentTable({ repos }: Props) {
                       </TableCell>
                       {i < allEnvs.length - 1 && (
                         <TableCell className="w-8 px-0 text-center align-middle">
-                          <span className={`font-mono text-sm ${sameAsNext ? "text-[#1e2d48]" : "text-[#2f4466]"}`}>
+                          <span className={`font-mono text-sm ${sameAsNext ? "text-border" : "text-muted-foreground/50"}`}>
                             →
                           </span>
                         </TableCell>

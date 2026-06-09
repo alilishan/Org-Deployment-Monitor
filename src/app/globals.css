@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
-  --font-heading: var(--font-syne), "Geist", ui-sans-serif;
+  --font-heading: var(--font-poppins), "Geist", ui-sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,41 +48,43 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ── Light theme ────────────────────────────────────────────────── */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --background: #f0f4f9;
+  --foreground: #1c2840;
+  --card: #ffffff;
+  --card-foreground: #1c2840;
+  --popover: #ffffff;
+  --popover-foreground: #1c2840;
+  --primary: #1c2840;
+  --primary-foreground: #f0f4f9;
+  --secondary: #e4eaf4;
+  --secondary-foreground: #1c2840;
+  --muted: #e4eaf4;
+  --muted-foreground: #5a708a;
+  --accent: #d8e1ef;
+  --accent-foreground: #1c2840;
+  --destructive: #dc2626;
+  --border: #cdd7e8;
+  --input: #cdd7e8;
+  --ring: #8aa4c8;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.5rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1c2840;
+  --sidebar-primary: #1c2840;
+  --sidebar-primary-foreground: #f0f4f9;
+  --sidebar-accent: #e4eaf4;
+  --sidebar-accent-foreground: #1c2840;
+  --sidebar-border: #cdd7e8;
+  --sidebar-ring: #8aa4c8;
 }
 
+/* ── Dark theme ─────────────────────────────────────────────────── */
 .dark {
   --background: #07080f;
   --foreground: #bcc6dc;
@@ -123,17 +125,13 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-image: radial-gradient(
-      ellipse 90% 40% at 50% 0%,
-      rgba(34, 211, 238, 0.03) 0%,
-      transparent 70%
-    );
   }
   html {
     @apply font-sans;
   }
 }
 
+/* ── Status badges ──────────────────────────────────────────────── */
 @layer components {
   .status-badge {
     display: inline-flex;
@@ -149,33 +147,19 @@
     white-space: nowrap;
   }
 
-  .status-success {
-    background: #081a10;
-    color: #34d399;
-    border-color: #134028;
-    box-shadow: 0 0 12px rgba(52, 211, 153, 0.1);
-  }
+  /* Light */
+  .status-success { background: #edfaf4; color: #065f46; border-color: #6ee7b7; }
+  .status-failure { background: #fef2f2; color: #991b1b; border-color: #fca5a5; }
+  .status-pending { background: #fffbeb; color: #92400e; border-color: #fcd34d; animation: pending-glow-light 2.4s ease-in-out infinite; }
+  .status-none    { background: transparent; color: #94a3b8; border-color: #cdd7e8; }
 
-  .status-failure {
-    background: #1a0808;
-    color: #f87171;
-    border-color: #441313;
-    box-shadow: 0 0 12px rgba(248, 113, 113, 0.1);
-  }
+  /* Dark overrides */
+  .dark .status-success { background: #081a10; color: #34d399; border-color: #134028; box-shadow: 0 0 12px rgba(52,211,153,0.1); animation: none; }
+  .dark .status-failure { background: #1a0808; color: #f87171; border-color: #441313; box-shadow: 0 0 12px rgba(248,113,113,0.1); animation: none; }
+  .dark .status-pending { background: #1a1200; color: #fbbf24; border-color: #443000; box-shadow: none; animation: pending-glow 2.4s ease-in-out infinite; }
+  .dark .status-none    { background: transparent; color: #2e3e58; border-color: #192034; animation: none; }
 
-  .status-pending {
-    background: #1a1200;
-    color: #fbbf24;
-    border-color: #443000;
-    animation: pending-glow 2.4s ease-in-out infinite;
-  }
-
-  .status-none {
-    background: transparent;
-    color: #2e3e58;
-    border-color: #192034;
-  }
-
+  /* Tag chips */
   .tag-chip {
     display: inline-flex;
     align-items: center;
@@ -187,46 +171,51 @@
     border-style: solid;
   }
 
-  .tag-chip-green {
-    background: #071510;
-    color: #34d399;
-    border-color: #0e3424;
-  }
+  /* Light */
+  .tag-chip-green { background: #edfaf4; color: #065f46; border-color: #a7f3d0; }
+  .tag-chip-amber { background: #fffbeb; color: #92400e; border-color: #fcd34d; }
+  .tag-chip-red   { background: #fef2f2; color: #991b1b; border-color: #fca5a5; }
 
-  .tag-chip-amber {
-    background: #140f00;
-    color: #fbbf24;
-    border-color: #3a2800;
-  }
+  /* Dark overrides */
+  .dark .tag-chip-green { background: #071510; color: #34d399; border-color: #0e3424; }
+  .dark .tag-chip-amber { background: #140f00; color: #fbbf24; border-color: #3a2800; }
+  .dark .tag-chip-red   { background: #130608; color: #f87171; border-color: #3a0f12; }
 
-  .tag-chip-red {
-    background: #130608;
-    color: #f87171;
-    border-color: #3a0f12;
-  }
-
+  /* Drift badge */
   .drift-badge {
     display: inline-flex;
     align-items: center;
     gap: 3px;
-    background: #1a1200;
-    color: #fbbf24;
-    border: 1px solid #443000;
     font-size: 10px;
     font-weight: 500;
     padding: 1px 6px;
     border-radius: 4px;
     letter-spacing: 0.03em;
     text-transform: uppercase;
+    border-width: 1px;
+    border-style: solid;
+    background: #fffbeb;
+    color: #92400e;
+    border-color: #fcd34d;
+  }
+  .dark .drift-badge {
+    background: #1a1200;
+    color: #fbbf24;
+    border-color: #443000;
   }
 }
 
 @keyframes pending-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(251, 191, 36, 0.1); }
-  50% { box-shadow: 0 0 18px rgba(251, 191, 36, 0.3); }
+  0%, 100% { box-shadow: 0 0 8px rgba(251,191,36,0.1); }
+  50% { box-shadow: 0 0 18px rgba(251,191,36,0.3); }
+}
+
+@keyframes pending-glow-light {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); }
+  50% { box-shadow: 0 0 0 2px rgba(251,191,36,0.25); }
 }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #07080f; }
-::-webkit-scrollbar-thumb { background: #192034; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #243050; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ring); }
