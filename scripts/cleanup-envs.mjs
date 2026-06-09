@@ -81,7 +81,10 @@ async function main() {
     const stale = deployments.filter(d => !KEEP_ENVS.has(d.environment))
     if (stale.length === 0) continue
 
-    const byEnv = Object.groupBy(stale, d => d.environment)
+    const byEnv = stale.reduce((acc, d) => {
+      (acc[d.environment] = acc[d.environment] || []).push(d)
+      return acc
+    }, {})
     const summary = Object.entries(byEnv)
       .map(([env, deps]) => `${env}(${deps.length})`)
       .join(", ")
