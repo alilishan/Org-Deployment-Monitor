@@ -2,7 +2,9 @@
 
 A high-signal deployment status dashboard for GitHub organisations. One table, every repository, every environment — with live container image tracking and drift detection.
 
-![Dashboard overview](docs/screenshots/dashboard.png)
+![Dashboard — dark mode](docs/screenshots/dashboard.png)
+
+![Dashboard — light mode](docs/screenshots/lightmode.png)
 
 ---
 
@@ -220,7 +222,8 @@ Screenshots live in `docs/screenshots/`. To add them:
 
 | File | What to capture |
 |------|----------------|
-| `docs/screenshots/dashboard.png` | Full dashboard — header, summary bar, and table |
+| `docs/screenshots/dashboard.png` | Full dashboard in dark mode |
+| `docs/screenshots/lightmode.png` | Full dashboard in light mode |
 | `docs/screenshots/pipeline-view.png` | A few rows of the table showing dev → uat → prod flow |
 | `docs/screenshots/table-detail.png` | A single row with all columns visible |
 | `docs/screenshots/tag-badges.png` | Close-up of an env cell showing green/amber/red tag chips |
