@@ -49,19 +49,45 @@ async function getRepoDeployments(token: string, fullName: string): Promise<GHDe
   return ghFetch<GHDeployment[]>(token, `/repos/${fullName}/deployments?per_page=100`)
 }
 
+// Marker tags that identify which environment an image belongs to
+const ENV_MARKER: Record<string, string> = { dev: "dev", uat: "uat", prod: "latest" }
+const MARKER_TAGS = new Set(Object.values(ENV_MARKER))
+
+type GHPackage = { name: string }
 type GHPackageVersion = { metadata: { container: { tags: string[] } } }
 
-async function getLatestImageTag(token: string, org: string, repoName: string): Promise<string | null> {
+async function getOrgPackages(token: string, org: string): Promise<GHPackage[]> {
+  try {
+    return ghFetch<GHPackage[]>(token, `/orgs/${org}/packages?package_type=container&per_page=100`)
+  } catch {
+    return []
+  }
+}
+
+// Returns env name → version tag, e.g. { dev: "main.36.1", uat: "main.33.0", prod: "main.1.1" }
+async function getImageTagsByEnv(
+  token: string,
+  org: string,
+  packageName: string
+): Promise<Record<string, string>> {
   try {
     const versions = await ghFetch<GHPackageVersion[]>(
       token,
-      `/orgs/${org}/packages/container/${encodeURIComponent(repoName)}/versions?per_page=1`
+      `/orgs/${org}/packages/container/${encodeURIComponent(packageName)}/versions?per_page=100`
     )
-    const tags = versions[0]?.metadata?.container?.tags ?? []
-    // Prefer a non-"latest" tag (the version tag), fall back to whatever exists
-    return tags.find(t => t !== "latest") ?? tags[0] ?? null
+    const result: Record<string, string> = {}
+    for (const version of versions) {
+      const tags = version.metadata?.container?.tags ?? []
+      const marker = tags.find(t => MARKER_TAGS.has(t))
+      if (!marker) continue
+      const versionTag = tags.find(t => !MARKER_TAGS.has(t))
+      if (!versionTag) continue
+      const env = Object.entries(ENV_MARKER).find(([, m]) => m === marker)?.[0]
+      if (env) result[env] = versionTag
+    }
+    return result
   } catch {
-    return null
+    return {}
   }
 }
 
@@ -69,12 +95,14 @@ async function getDeploymentStatuses(token: string, fullName: string, id: number
   return ghFetch<GHDeploymentStatus[]>(token, `/repos/${fullName}/deployments/${id}/statuses`)
 }
 
-async function fetchRepoDeployment(token: string, repo: GHRepo): Promise<RepoDeployment> {
-  const org = repo.full_name.split("/")[0]
-  const [tags, deployments, latestImageTag] = await Promise.all([
+async function fetchRepoDeployment(
+  token: string,
+  repo: GHRepo,
+  imageTagsByEnv: Record<string, string>
+): Promise<RepoDeployment> {
+  const [tags, deployments] = await Promise.all([
     getRepoTags(token, repo.full_name),
     getRepoDeployments(token, repo.full_name),
-    getLatestImageTag(token, org, repo.name),
   ])
 
   const latestTag = tags[0]?.name ?? null
@@ -91,6 +119,7 @@ async function fetchRepoDeployment(token: string, repo: GHRepo): Promise<RepoDep
       return {
         environment: env,
         version: resolveVersion(dep.ref, tags),
+        imageTag: imageTagsByEnv[env] ?? null,
         status: normaliseStatus(statuses[0]?.state),
         deployedAt: dep.created_at,
         deployedBy: dep.creator?.login ?? null,
@@ -99,10 +128,29 @@ async function fetchRepoDeployment(token: string, repo: GHRepo): Promise<RepoDep
     })
   )
 
-  return { name: repo.name, fullName: repo.full_name, latestTag, latestImageTag, environments }
+  return { name: repo.name, fullName: repo.full_name, latestTag, environments }
 }
 
 export async function fetchDashboard(token: string, org = "BUCC-Ounch"): Promise<RepoDeployment[]> {
-  const repos = await getOrgRepos(token, org)
-  return Promise.all(repos.map(r => fetchRepoDeployment(token, r)))
+  const [repos, packages] = await Promise.all([
+    getOrgRepos(token, org),
+    getOrgPackages(token, org),
+  ])
+
+  // Match each repo to its container package (name may be "repo" or "repo/service")
+  const packageByRepo = new Map<string, string>()
+  for (const pkg of packages) {
+    const repoName = pkg.name.split("/")[0]
+    if (!packageByRepo.has(repoName)) packageByRepo.set(repoName, pkg.name)
+  }
+
+  return Promise.all(
+    repos.map(async repo => {
+      const packageName = packageByRepo.get(repo.name)
+      const imageTagsByEnv = packageName
+        ? await getImageTagsByEnv(token, org, packageName)
+        : {}
+      return fetchRepoDeployment(token, repo, imageTagsByEnv)
+    })
+  )
 }

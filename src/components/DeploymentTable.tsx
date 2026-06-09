@@ -49,18 +49,8 @@ export default function DeploymentTable({ repos }: Props) {
                 </a>
                 {repo.latestTag && (
                   <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">
-                    tag: {repo.latestTag}
+                    latest: {repo.latestTag}
                   </div>
-                )}
-                {repo.latestImageTag && (
-                  <a
-                    href={`https://github.com/orgs/BUCC-Ounch/packages/container/package/${repo.name}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[10px] text-muted-foreground mt-0.5 font-mono hover:underline block"
-                  >
-                    image: {repo.latestImageTag}
-                  </a>
                 )}
               </TableCell>
               {allEnvs.map((env, i) => {
