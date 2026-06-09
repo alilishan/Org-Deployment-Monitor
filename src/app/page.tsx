@@ -8,7 +8,7 @@ import AuthErrorBanner from "@/components/AuthErrorBanner"
 
 export default async function DashboardPage() {
   const session = await auth()
-  if (!session) redirect("/api/auth/signin")
+  if (!session?.accessToken) redirect("/api/auth/signin")
 
   try {
     const repos = await fetchDashboard(session.accessToken)
