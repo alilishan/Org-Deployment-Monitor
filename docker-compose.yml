@@ -7,9 +7,11 @@ services:
       - "${HOST_PORT:-3000}:3000"
     volumes:
       - .:/app
-      # Anonymous volume prevents the host node_modules from overwriting
-      # the ones installed inside the container image.
+      # Anonymous volumes prevent host directories from overwriting container
+      # equivalents. node_modules must match the Alpine Linux platform, and
+      # .next must not carry macOS Turbopack cache into a Linux container.
       - /app/node_modules
+      - /app/.next
     env_file:
       - .env
     environment:
