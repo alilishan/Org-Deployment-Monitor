@@ -7,9 +7,11 @@ export async function refreshDashboard() {
 }
 
 export async function reauthenticate() {
-  await signOut({ redirectTo: "/api/auth/signin" })
+  // callbackUrl=%2F ensures NextAuth redirects to / after OAuth completes,
+  // not back to /api/auth/signin (which would create a redirect loop).
+  await signOut({ redirectTo: "/api/auth/signin?callbackUrl=%2F" })
 }
 
 export async function logout() {
-  await signOut({ redirectTo: "/api/auth/signin" })
+  await signOut({ redirectTo: "/api/auth/signin?callbackUrl=%2F" })
 }
