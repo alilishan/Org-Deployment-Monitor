@@ -1,0 +1,15 @@
+FROM node:alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci
+
+# Source code is bind-mounted at runtime via docker-compose.
+# The anonymous volume on /app/node_modules keeps the container's
+# installed modules intact and prevents the host directory from overwriting them.
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

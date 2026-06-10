@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${HOST_PORT:-3000}:3000"
+    volumes:
+      - .:/app
+      # Anonymous volume prevents the host node_modules from overwriting
+      # the ones installed inside the container image.
+      - /app/node_modules
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
