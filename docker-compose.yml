@@ -14,3 +14,6 @@ services:
       - .env
     environment:
       - NODE_ENV=development
+      # NextAuth v5 uses AUTH_URL to build redirect URLs.
+      # Without this it falls back to the container's bind address (0.0.0.0:3000).
+      - AUTH_URL=http://localhost:${HOST_PORT:-3000}
