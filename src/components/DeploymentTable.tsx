@@ -1,4 +1,6 @@
-import { Fragment } from "react"
+"use client"
+
+import { Fragment, useState } from "react"
 import {
   Table,
   TableBody,
@@ -19,13 +21,34 @@ const envDot: Record<string, string> = {
   prod: "bg-emerald-500 dark:bg-emerald-400",
 }
 
+const TEMPLATE_REPOS = new Set(["bucc-app-template", "bucc-service-template"])
+
 export default function DeploymentTable({ repos }: Props) {
+  const [showTemplates, setShowTemplates] = useState(false)
+
+  const visibleRepos = showTemplates
+    ? repos
+    : repos.filter(r => !TEMPLATE_REPOS.has(r.name))
+
+  const hiddenCount = repos.filter(r => TEMPLATE_REPOS.has(r.name)).length
+
   const allEnvs = sortEnvironments([
-    ...new Set(repos.flatMap(r => r.environments.map(e => e.environment))),
+    ...new Set(visibleRepos.flatMap(r => r.environments.map(e => e.environment))),
   ])
 
   return (
-    <div className="rounded-[8px] border border-border overflow-hidden">
+    <div className="space-y-3">
+      {hiddenCount > 0 && (
+        <div className="flex items-center justify-end">
+          <button
+            onClick={() => setShowTemplates(v => !v)}
+            className="font-mono text-[11px] px-3 py-1.5 rounded-[5px] border border-border bg-background text-muted-foreground hover:text-foreground hover:border-muted-foreground/40 transition-colors duration-150"
+          >
+            {showTemplates ? "Hide template repos" : `Show template repos (${hiddenCount})`}
+          </button>
+        </div>
+      )}
+      <div className="rounded-[8px] border border-border overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="border-b border-border bg-muted/40 dark:bg-[#0a0e1c] hover:bg-muted/40 dark:hover:bg-[#0a0e1c]">
@@ -48,7 +71,7 @@ export default function DeploymentTable({ repos }: Props) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {repos.map((repo, rowIndex) => {
+          {visibleRepos.map((repo, rowIndex) => {
             const envMap = new Map(repo.environments.map(e => [e.environment, e]))
             const tagFingerprints = repo.environments
               .map(e => [...e.imageTags].sort().join(","))
@@ -113,6 +136,7 @@ export default function DeploymentTable({ repos }: Props) {
           })}
         </TableBody>
       </Table>
+      </div>
     </div>
   )
 }
