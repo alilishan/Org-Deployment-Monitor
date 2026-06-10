@@ -48,7 +48,7 @@ export default async function DashboardPage() {
       </main>
     )
   } catch (e) {
-    if (e instanceof GitHubAuthError) return <AuthErrorBanner />
+    if (e instanceof GitHubAuthError) return <AuthErrorBanner error={e} />
     throw e
   }
 }

@@ -1,6 +1,13 @@
 import { reauthenticate, logout } from "@/app/actions"
+import type { GitHubAuthError } from "@/lib/github"
 
-export default function AuthErrorBanner() {
+interface Props {
+  error?: GitHubAuthError
+}
+
+export default function AuthErrorBanner({ error }: Props) {
+  const is403 = error?.status === 403
+
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="flex flex-col items-center gap-4 max-w-sm text-center">
@@ -8,12 +15,20 @@ export default function AuthErrorBanner() {
           <span className="text-red-400 text-lg">!</span>
         </div>
         <div className="space-y-1.5">
-          <p className="font-heading font-semibold text-[#bcc6dc] text-sm">Session expired</p>
+          <p className="font-heading font-semibold text-[#bcc6dc] text-sm">
+            {is403 ? "Access denied" : "Session expired"}
+          </p>
           <p className="text-[11px] text-[#4d6080] leading-relaxed">
-            Your GitHub session has expired or lacks the required permissions:{" "}
-            <code className="font-mono text-[10px] text-[#4d88cc]">read:org</code>,{" "}
-            <code className="font-mono text-[10px] text-[#4d88cc]">repo</code>,{" "}
-            <code className="font-mono text-[10px] text-[#4d88cc]">read:packages</code>.
+            {is403
+              ? "Your token was accepted by GitHub but the organisation denied access. An org admin may need to approve this OAuth app, or you may need to grant org access during sign-in."
+              : "Your GitHub session has expired or lacks the required permissions: "}
+            {!is403 && (
+              <>
+                <code className="font-mono text-[10px] text-[#4d88cc]">read:org</code>,{" "}
+                <code className="font-mono text-[10px] text-[#4d88cc]">repo</code>,{" "}
+                <code className="font-mono text-[10px] text-[#4d88cc]">read:packages</code>.
+              </>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2">

@@ -1,17 +1,19 @@
 "use server"
 import { revalidatePath } from "next/cache"
-import { signOut } from "@/lib/auth"
+import { signIn, signOut } from "@/lib/auth"
 
 export async function refreshDashboard() {
   revalidatePath("/")
 }
 
 export async function reauthenticate() {
-  // callbackUrl=%2F ensures NextAuth redirects to / after OAuth completes,
-  // not back to /api/auth/signin (which would create a redirect loop).
-  await signOut({ redirectTo: "/api/auth/signin?callbackUrl=%2F" })
+  // Sign out first (clears session cookie), then immediately start a fresh
+  // GitHub OAuth so there is no window where the browser holds both the old
+  // stale cookie and the redirect to the sign-in page.
+  await signOut({ redirect: false })
+  await signIn("github", { redirectTo: "/" })
 }
 
 export async function logout() {
-  await signOut({ redirectTo: "/api/auth/signin?callbackUrl=%2F" })
+  await signOut({ redirectTo: "/api/auth/signin?callbackUrl=/" })
 }

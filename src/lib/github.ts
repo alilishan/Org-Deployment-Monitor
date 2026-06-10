@@ -13,7 +13,11 @@ type GHDeployment = {
 }
 type GHDeploymentStatus = { state: string }
 
-export class GitHubAuthError extends Error {}
+export class GitHubAuthError extends Error {
+  constructor(public readonly status: number, message?: string) {
+    super(message ?? `GitHub API auth error (${status})`)
+  }
+}
 
 const ENV_ALIASES: Record<string, string> = { production: "prod" }
 const normaliseEnv = (env: string) => ENV_ALIASES[env.toLowerCase()] ?? env
@@ -27,7 +31,11 @@ async function ghFetch<T>(token: string, path: string): Promise<T> {
     },
     cache: "no-store",
   })
-  if (res.status === 401 || res.status === 403) throw new GitHubAuthError()
+  if (res.status === 401 || res.status === 403) {
+    const body = await res.text().catch(() => "")
+    console.error(`[github] ${res.status} on ${path} — ${body}`)
+    throw new GitHubAuthError(res.status, body)
+  }
   if (!res.ok) throw new Error(`GitHub API ${res.status}: ${path}`)
   return res.json() as Promise<T>
 }
