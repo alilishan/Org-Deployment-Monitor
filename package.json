@@ -9,7 +9,11 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "docker:dev": "docker compose up --build",
+    "docker:prod": "docker compose -f docker-compose.prod.yml up --build -d",
+    "docker:stop": "docker compose down",
+    "docker:build": "docker build -t bucc-deployment-app:latest ."
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
