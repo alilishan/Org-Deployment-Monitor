@@ -9,3 +9,7 @@ export async function refreshDashboard() {
 export async function reauthenticate() {
   await signOut({ redirectTo: "/api/auth/signin" })
 }
+
+export async function logout() {
+  await signOut({ redirectTo: "/api/auth/signin" })
+}

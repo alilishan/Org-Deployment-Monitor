@@ -1,4 +1,4 @@
-import { reauthenticate } from "@/app/actions"
+import { reauthenticate, logout } from "@/app/actions"
 
 export default function AuthErrorBanner() {
   return (
@@ -16,14 +16,24 @@ export default function AuthErrorBanner() {
             <code className="font-mono text-[10px] text-[#4d88cc]">read:packages</code>.
           </p>
         </div>
-        <form action={reauthenticate}>
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-[6px] border border-[#243050] bg-[#0f1828] text-[#8aabcc] hover:text-cyan-300 hover:border-[#2f4466] hover:bg-[#122038] transition-all duration-150 font-mono text-[11px] tracking-wide"
-          >
-            Re-authenticate with GitHub
-          </button>
-        </form>
+        <div className="flex items-center gap-2">
+          <form action={reauthenticate}>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-[6px] border border-[#243050] bg-[#0f1828] text-[#8aabcc] hover:text-cyan-300 hover:border-[#2f4466] hover:bg-[#122038] transition-all duration-150 font-mono text-[11px] tracking-wide"
+            >
+              Re-authenticate
+            </button>
+          </form>
+          <form action={logout}>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-[6px] border border-[#2a1f1f] bg-[#110c0c] text-[#7a6060] hover:text-red-400 hover:border-[#4a2020] hover:bg-[#1a0e0e] transition-all duration-150 font-mono text-[11px] tracking-wide"
+            >
+              Log out
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )
