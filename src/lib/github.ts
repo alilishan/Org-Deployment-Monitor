@@ -150,6 +150,8 @@ async function fetchRepoDeployment(
   return { name: repo.name, fullName: repo.full_name, latestTag, environments }
 }
 
+const EXCLUDED_REPOS = new Set(["bucc-deployments", "bucc-project-adr"])
+
 export async function fetchDashboard(token: string, org = "BUCC-Ounch"): Promise<RepoDeployment[]> {
   const [repos, packages] = await Promise.all([
     getOrgRepos(token, org),
@@ -164,7 +166,7 @@ export async function fetchDashboard(token: string, org = "BUCC-Ounch"): Promise
   }
 
   return Promise.all(
-    repos.map(async repo => {
+    repos.filter(repo => !EXCLUDED_REPOS.has(repo.name)).map(async repo => {
       const packageName = packageByRepo.get(repo.name)
       const imageTagsByEnv = packageName
         ? await getImageTagsByEnv(token, org, packageName)
