@@ -15,6 +15,9 @@ type GHDeploymentStatus = { state: string }
 
 export class GitHubAuthError extends Error {}
 
+const ENV_ALIASES: Record<string, string> = { production: "prod" }
+const normaliseEnv = (env: string) => ENV_ALIASES[env.toLowerCase()] ?? env
+
 async function ghFetch<T>(token: string, path: string): Promise<T> {
   const res = await fetch(`https://api.github.com${path}`, {
     headers: {
@@ -117,7 +120,8 @@ async function fetchRepoDeployment(
   // Keep only the latest deployment per environment (API returns newest first)
   const latestPerEnv = new Map<string, GHDeployment>()
   for (const dep of deployments) {
-    if (!latestPerEnv.has(dep.environment)) latestPerEnv.set(dep.environment, dep)
+    const env = normaliseEnv(dep.environment)
+    if (!latestPerEnv.has(env)) latestPerEnv.set(env, dep)
   }
 
   const environments: EnvDeployment[] = await Promise.all(
