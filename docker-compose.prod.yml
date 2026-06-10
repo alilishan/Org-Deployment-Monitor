@@ -9,4 +9,5 @@ services:
       - .env
     environment:
       - NODE_ENV=production
+      - AUTH_URL=http://localhost:${HOST_PORT:-3000}
     restart: unless-stopped
