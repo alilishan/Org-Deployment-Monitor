@@ -1,6 +1,7 @@
 "use client"
 
-import { Fragment, useState } from "react"
+import { Fragment } from "react"
+import { ArrowRight, TriangleAlert } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -11,9 +12,10 @@ import {
 } from "@/components/ui/table"
 import { sortEnvironments } from "@/lib/env-order"
 import EnvCell from "@/components/EnvCell"
+import { TEMPLATE_REPOS } from "@/lib/template-repos"
 import type { RepoDeployment } from "@/types/deployment"
 
-type Props = { repos: RepoDeployment[] }
+type Props = { repos: RepoDeployment[]; showTemplates: boolean }
 
 const envDot: Record<string, string> = {
   dev:  "bg-cyan-500 dark:bg-cyan-400",
@@ -21,34 +23,17 @@ const envDot: Record<string, string> = {
   prod: "bg-emerald-500 dark:bg-emerald-400",
 }
 
-const TEMPLATE_REPOS = new Set(["bucc-app-template", "bucc-service-template"])
-
-export default function DeploymentTable({ repos }: Props) {
-  const [showTemplates, setShowTemplates] = useState(false)
-
+export default function DeploymentTable({ repos, showTemplates }: Props) {
   const visibleRepos = showTemplates
     ? repos
     : repos.filter(r => !TEMPLATE_REPOS.has(r.name))
-
-  const hiddenCount = repos.filter(r => TEMPLATE_REPOS.has(r.name)).length
 
   const allEnvs = sortEnvironments([
     ...new Set(visibleRepos.flatMap(r => r.environments.map(e => e.environment))),
   ])
 
   return (
-    <div className="space-y-3">
-      {hiddenCount > 0 && (
-        <div className="flex items-center justify-end">
-          <button
-            onClick={() => setShowTemplates(v => !v)}
-            className="font-mono text-[11px] px-3 py-1.5 rounded-[5px] border border-border bg-background text-muted-foreground hover:text-foreground hover:border-muted-foreground/40 transition-colors duration-150"
-          >
-            {showTemplates ? "Hide template repos" : `Show template repos (${hiddenCount})`}
-          </button>
-        </div>
-      )}
-      <div className="rounded-[8px] border border-border overflow-hidden">
+    <div className="rounded-[8px] border border-border overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow className="border-b border-border bg-muted/40 dark:bg-[#0a0e1c] hover:bg-muted/40 dark:hover:bg-[#0a0e1c]">
@@ -98,7 +83,8 @@ export default function DeploymentTable({ repos }: Props) {
                     </a>
                     {imageDrifted && (
                       <span className="drift-badge" title="Image versions differ across environments">
-                        ⚠ drift
+                        <TriangleAlert className="w-3 h-3" />
+                        drift
                       </span>
                     )}
                   </div>
@@ -123,9 +109,7 @@ export default function DeploymentTable({ repos }: Props) {
                       </TableCell>
                       {i < allEnvs.length - 1 && (
                         <TableCell className="w-8 px-0 text-center align-middle">
-                          <span className={`font-mono text-sm ${sameAsNext ? "text-border" : "text-muted-foreground/50"}`}>
-                            →
-                          </span>
+                          <ArrowRight className={`w-3.5 h-3.5 mx-auto ${sameAsNext ? "text-border" : "text-muted-foreground/50"}`} />
                         </TableCell>
                       )}
                     </Fragment>
@@ -137,6 +121,5 @@ export default function DeploymentTable({ repos }: Props) {
         </TableBody>
       </Table>
       </div>
-    </div>
   )
 }
