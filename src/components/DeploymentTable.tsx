@@ -1,7 +1,7 @@
 "use client"
 
 import { Fragment } from "react"
-import { ArrowRight, TriangleAlert } from "lucide-react"
+import { ArrowRight, Check, TriangleAlert } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { sortEnvironments } from "@/lib/env-order"
+import { getSyncStatus } from "@/lib/sync-status"
 import EnvCell from "@/components/EnvCell"
 import { TEMPLATE_REPOS } from "@/lib/template-repos"
 import type { RepoDeployment } from "@/types/deployment"
@@ -22,6 +23,15 @@ const envDot: Record<string, string> = {
   uat:  "bg-amber-500 dark:bg-amber-400",
   prod: "bg-emerald-500 dark:bg-emerald-400",
 }
+
+const syncBadge: Record<string, string> = {
+  synced: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900",
+  dev:    "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-400 dark:border-cyan-900",
+  uat:    "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900",
+}
+
+const syncBadgeFallback =
+  "bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-950/40 dark:text-slate-400 dark:border-slate-800"
 
 export default function DeploymentTable({ repos, showTemplates }: Props) {
   const visibleRepos = showTemplates
@@ -53,6 +63,9 @@ export default function DeploymentTable({ repos, showTemplates }: Props) {
                 )}
               </Fragment>
             ))}
+            <TableHead className="w-28 py-3 px-4 font-mono text-[10px] tracking-widest text-muted-foreground/60 uppercase">
+              Status
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -62,6 +75,7 @@ export default function DeploymentTable({ repos, showTemplates }: Props) {
               .map(e => [...e.imageTags].sort().join(","))
               .filter(s => s !== "")
             const imageDrifted = tagFingerprints.length > 1 && new Set(tagFingerprints).size > 1
+            const sync = getSyncStatus(repo.environments)
             return (
               <TableRow
                 key={repo.fullName}
@@ -115,6 +129,20 @@ export default function DeploymentTable({ repos, showTemplates }: Props) {
                     </Fragment>
                   )
                 })}
+                <TableCell className="align-top py-4 px-4">
+                  {sync ? (
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-[4px] border px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider whitespace-nowrap ${
+                        syncBadge[sync.kind === "synced" ? "synced" : sync.env] ?? syncBadgeFallback
+                      }`}
+                    >
+                      {sync.kind === "synced" && <Check className="w-3 h-3" />}
+                      {sync.label}
+                    </span>
+                  ) : (
+                    <span className="font-mono text-[11px] text-muted-foreground/30">—</span>
+                  )}
+                </TableCell>
               </TableRow>
             )
           })}
