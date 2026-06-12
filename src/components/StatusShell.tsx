@@ -1,5 +1,15 @@
 "use client"
 
+import {
+  Server,
+  Clock,
+  MemoryStick,
+  Rabbit,
+  HeartPulse,
+  Boxes,
+  Route,
+  type LucideIcon,
+} from "lucide-react"
 import { refreshStatus } from "@/app/actions"
 import RefreshButton from "@/components/RefreshButton"
 import ThemeToggle from "@/components/ThemeToggle"
@@ -19,10 +29,16 @@ const stateDot: Record<HeartbeatState, string> = {
   down:  "bg-red-500 dark:bg-red-400",
 }
 
-const stateText: Record<HeartbeatState, string> = {
-  ok:    "text-emerald-600 dark:text-emerald-400",
-  stale: "text-amber-600 dark:text-amber-400",
-  down:  "text-red-600 dark:text-red-400",
+const statePill: Record<HeartbeatState, string> = {
+  ok:    "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900",
+  stale: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900",
+  down:  "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900",
+}
+
+const stateLabel: Record<HeartbeatState, string> = {
+  ok: "up",
+  stale: "stale",
+  down: "down",
 }
 
 function serviceState(service: GatewayService, now: number): HeartbeatState {
@@ -32,11 +48,16 @@ function serviceState(service: GatewayService, now: number): HeartbeatState {
   return "ok"
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({ icon: Icon, title, children }: { icon: LucideIcon; title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-[8px] border border-border bg-card p-4">
-      <div className="font-mono text-[10px] tracking-widest text-muted-foreground/60 uppercase mb-3">
-        {title}
+    <div className="rounded-[8px] border border-border bg-card p-4 transition-colors hover:border-muted-foreground/30">
+      <div className="flex items-center gap-2 mb-3.5">
+        <div className="flex items-center justify-center w-6 h-6 rounded-[5px] bg-muted border border-border">
+          <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+        </div>
+        <span className="font-mono text-[10px] tracking-widest text-muted-foreground/60 uppercase">
+          {title}
+        </span>
       </div>
       {children}
     </div>
@@ -56,6 +77,7 @@ export default function StatusShell({ status, fetchedAt, userName }: Props) {
   const rabbitOk = status.rabbitmq.connection === "ok" && status.rabbitmq.connection_details.connected
   const mgmt = status.rabbitmq.management
   const downCount = status.services.filter(s => serviceState(s, fetchedAt) === "down").length
+  const heapPct = Math.min(100, Math.round((status.memory.heapUsed / status.memory.heapTotal) * 100))
 
   return (
     <main className="min-h-screen">
@@ -110,31 +132,48 @@ export default function StatusShell({ status, fetchedAt, userName }: Props) {
       <div className="px-6 py-5 space-y-5">
         {/* Gateway overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card title="Gateway">
+          <Card icon={Server} title="Gateway">
             <div className="space-y-2">
               <Stat label="name" value={status.name} />
               <Stat label="version" value={status.version} />
               <Stat label="env" value={status.environment} accent="text-cyan-600 dark:text-cyan-400" />
             </div>
           </Card>
-          <Card title="Uptime">
-            <div className="font-mono text-2xl font-semibold text-foreground">{formatUptime(status.uptime)}</div>
-            <div className="mt-2 font-mono text-[11px] text-muted-foreground">
+
+          <Card icon={Clock} title="Uptime">
+            <div className="font-mono text-2xl font-semibold text-foreground leading-none">
+              {formatUptime(status.uptime)}
+            </div>
+            <div className="mt-3 font-mono text-[11px] text-muted-foreground">
               checked {formatAge(new Date(status.timestamp).getTime(), fetchedAt)}
             </div>
           </Card>
-          <Card title="Memory">
-            <div className="space-y-2">
-              <Stat label="heap used" value={formatBytes(status.memory.heapUsed)} />
-              <Stat label="heap total" value={formatBytes(status.memory.heapTotal)} />
-              <Stat label="rss" value={formatBytes(status.memory.rss)} />
+
+          <Card icon={MemoryStick} title="Memory">
+            <div className="flex items-baseline justify-between mb-2">
+              <span className="font-mono text-[12px] font-semibold text-foreground">
+                {formatBytes(status.memory.heapUsed)}
+              </span>
+              <span className="font-mono text-[10px] text-muted-foreground">
+                of {formatBytes(status.memory.heapTotal)} heap
+              </span>
             </div>
+            <div className="h-1.5 rounded-full bg-muted overflow-hidden mb-3">
+              <div
+                className={`h-full rounded-full ${heapPct > 85 ? "bg-red-500 dark:bg-red-400" : heapPct > 70 ? "bg-amber-500 dark:bg-amber-400" : "bg-cyan-500 dark:bg-cyan-400"}`}
+                style={{ width: `${heapPct}%` }}
+              />
+            </div>
+            <Stat label="rss" value={formatBytes(status.memory.rss)} />
           </Card>
-          <Card title="RabbitMQ">
+
+          <Card icon={Rabbit} title="RabbitMQ">
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className={`w-1.5 h-1.5 rounded-full ${rabbitOk ? stateDot.ok : stateDot.down}`} />
-                <span className={`font-mono text-[12px] font-semibold ${rabbitOk ? stateText.ok : stateText.down}`}>
+              <div className="flex items-center justify-between">
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-[4px] border px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider ${rabbitOk ? statePill.ok : statePill.down}`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${rabbitOk ? stateDot.ok : stateDot.down}`} />
                   {rabbitOk ? "connected" : "disconnected"}
                 </span>
                 {mgmt && <span className="font-mono text-[10px] text-muted-foreground/60">v{mgmt.version}</span>}
@@ -155,35 +194,45 @@ export default function StatusShell({ status, fetchedAt, userName }: Props) {
 
         {/* Services */}
         <div>
-          <div className="font-mono text-[10px] tracking-widest text-muted-foreground/60 uppercase mb-3">
-            Services ({status.services.length})
+          <div className="flex items-center gap-2 mb-3">
+            <Boxes className="w-3.5 h-3.5 text-muted-foreground/60" />
+            <span className="font-mono text-[10px] tracking-widest text-muted-foreground/60 uppercase">
+              Services ({status.services.length})
+            </span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {status.services.map(service => {
               const state = serviceState(service, fetchedAt)
               return (
-                <div key={service.serviceName} className="rounded-[8px] border border-border bg-card p-4">
+                <div
+                  key={service.serviceName}
+                  className="rounded-[8px] border border-border bg-card p-4 transition-colors hover:border-muted-foreground/30"
+                >
                   <div className="flex items-center justify-between gap-2 mb-3">
                     <span className="font-mono font-semibold text-[13px] text-foreground">
                       {service.serviceName}
                     </span>
-                    <div className="flex items-center gap-1.5">
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-[4px] border px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider ${statePill[state]}`}
+                    >
                       <span className={`w-1.5 h-1.5 rounded-full ${stateDot[state]}`} />
-                      <span className={`font-mono text-[10px] uppercase tracking-wider ${stateText[state]}`}>
-                        {state === "ok" ? "up" : state}
-                      </span>
-                    </div>
+                      {stateLabel[state]}
+                    </span>
                   </div>
-                  {service.instances.map(instance => (
-                    <div key={instance.url} className="flex items-baseline justify-between gap-3">
-                      <span className="font-mono text-[11px] text-muted-foreground truncate">
-                        {instance.proxyUrl}
-                      </span>
-                      <span className="font-mono text-[11px] text-muted-foreground/60 whitespace-nowrap">
-                        ♥ {formatAge(instance.lastHeartbeat, fetchedAt)}
-                      </span>
-                    </div>
-                  ))}
+                  <div className="space-y-1.5">
+                    {service.instances.map(instance => (
+                      <div key={instance.url} className="flex items-center justify-between gap-3">
+                        <span className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground truncate">
+                          <Route className="w-3 h-3 text-muted-foreground/50 shrink-0" />
+                          {instance.proxyUrl}
+                        </span>
+                        <span className="flex items-center gap-1 font-mono text-[11px] text-muted-foreground/60 whitespace-nowrap">
+                          <HeartPulse className="w-3 h-3" />
+                          {formatAge(instance.lastHeartbeat, fetchedAt)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )
             })}
