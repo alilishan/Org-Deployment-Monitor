@@ -63,7 +63,7 @@ async function getRepoDeployments(token: string, fullName: string): Promise<GHDe
 
 // Marker tags that identify which environment an image belongs to
 const ENV_MARKER: Record<string, string> = { dev: "dev", uat: "uat", prod: "latest" }
-const MARKER_TAGS = new Set(Object.values(ENV_MARKER))
+const MARKER_TAGS = new Set([...Object.values(ENV_MARKER), "prod"])
 
 type GHPackage = { name: string }
 type GHPackageVersion = { metadata: { container: { tags: string[] } } }
