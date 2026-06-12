@@ -4,6 +4,7 @@ import { useState } from "react"
 import { refreshDashboard } from "@/app/actions"
 import RefreshButton from "@/components/RefreshButton"
 import ThemeToggle from "@/components/ThemeToggle"
+import HeaderNav from "@/components/HeaderNav"
 import DeploymentTable from "@/components/DeploymentTable"
 import { TEMPLATE_REPOS } from "@/lib/template-repos"
 import type { RepoDeployment } from "@/types/deployment"
@@ -38,6 +39,7 @@ export default function DashboardShell({ repos, summary, userName }: Props) {
               Deployments
             </span>
           </div>
+          <HeaderNav />
         </div>
 
         {/* Summary stats */}

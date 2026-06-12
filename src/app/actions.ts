@@ -6,6 +6,10 @@ export async function refreshDashboard() {
   revalidatePath("/")
 }
 
+export async function refreshStatus() {
+  revalidatePath("/status")
+}
+
 export async function reauthenticate() {
   // Sign out first (clears session cookie), then immediately start a fresh
   // GitHub OAuth so there is no window where the browser holds both the old
