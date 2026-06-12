@@ -152,12 +152,14 @@
   .status-failure { background: #fef2f2; color: #991b1b; border-color: #fca5a5; }
   .status-pending { background: #fffbeb; color: #92400e; border-color: #fcd34d; animation: pending-glow-light 2.4s ease-in-out infinite; }
   .status-none    { background: transparent; color: #94a3b8; border-color: #cdd7e8; }
+  .status-sha     { background: #eff6ff; color: #1e40af; border-color: #93c5fd; }
 
   /* Dark overrides */
   .dark .status-success { background: #081a10; color: #34d399; border-color: #134028; box-shadow: 0 0 12px rgba(52,211,153,0.1); animation: none; }
   .dark .status-failure { background: #1a0808; color: #f87171; border-color: #441313; box-shadow: 0 0 12px rgba(248,113,113,0.1); animation: none; }
   .dark .status-pending { background: #1a1200; color: #fbbf24; border-color: #443000; box-shadow: none; animation: pending-glow 2.4s ease-in-out infinite; }
   .dark .status-none    { background: transparent; color: #2e3e58; border-color: #192034; animation: none; }
+  .dark .status-sha     { background: #081120; color: #60a5fa; border-color: #16294a; box-shadow: 0 0 12px rgba(96,165,250,0.1); animation: none; }
 
   /* Tag chips */
   .tag-chip {

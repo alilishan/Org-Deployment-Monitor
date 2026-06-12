@@ -6,6 +6,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { formatRelative } from "@/lib/format-date"
+import { isShaVersion } from "@/lib/version"
 import type { EnvDeployment, DeploymentStatus } from "@/types/deployment"
 
 const statusClass: Record<DeploymentStatus, string> = {
@@ -34,6 +35,11 @@ export default function EnvCell({ deployment }: Props) {
   }
 
   const icon = statusIcon[deployment.status]
+  // Blue for unreleased commits (short-SHA versions); failure/pending colors take precedence
+  const badgeClass =
+    deployment.status === "success" && isShaVersion(deployment.version)
+      ? "status-badge status-sha"
+      : statusClass[deployment.status]
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -47,7 +53,7 @@ export default function EnvCell({ deployment }: Props) {
               rel="noopener noreferrer"
               className="inline-block"
             >
-              <span className={statusClass[deployment.status]}>
+              <span className={badgeClass}>
                 {icon && <span className="mr-1 opacity-70">{icon}</span>}
                 {deployment.version ?? "unknown"}
               </span>

@@ -7,6 +7,7 @@ type GHTag  = { name: string; commit: { sha: string } }
 type GHDeployment = {
   id: number
   ref: string
+  sha: string | null
   environment: string
   created_at: string
   creator: { login: string } | null
@@ -137,7 +138,7 @@ async function fetchRepoDeployment(
       const statuses = await getDeploymentStatuses(token, repo.full_name, dep.id)
       return {
         environment: env,
-        version: resolveVersion(dep.ref, tags),
+        version: resolveVersion(dep.ref, dep.sha, tags),
         imageTags: imageTagsByEnv[env] ?? [],
         status: normaliseStatus(statuses[0]?.state),
         deployedAt: dep.created_at,
